@@ -18,16 +18,64 @@ message(0x44) Refund {
   sender: Address;
 }
 
+message Forward {
+  msg: Slice;
+  address: Address;
+}
+
+contract Admin with Deployable {
+    queryId: Int as uint64;
+    init() {
+        self.queryId = 0;
+    }
+    receive(msg: Forward) {
+        let ctx: Context = context();
+        send(SendParameters{
+            to: ctx.sender,
+            value: ctx.value,
+            mode: SendIgnoreErrors,
+            bounce: false,
+            body: Refund{
+                queryId: self.queryId,
+                sender: msg.address 
+            }.toCell()
+        });
+        self.queryId = self.queryId + 1;
+    }
+}
+
+// Proxy
 contract Task2 with Deployable {
   admin: Address;
 
   init(admin: Address) {
     self.admin = admin;
   }
-  
   receive(msg: Refund) {
+      let ctx: Context = context();
+      // sender needs to be from admin address
+      require(ctx.sender == self.admin, "Refund sender should be admin");
+      // return the fund back to the user
+      send(SendParameters{
+          to: ctx.sender,
+          value: ctx.value,
+          mode: SendIgnoreErrors,
+          bounce: false,
+          body: emptyCell()
+      });
   }
 
   receive(msg: Slice) {
+      let ctx: Context = context();
+      send(SendParameters{
+          to: self.admin,
+          value: ctx.value,
+          mode: SendIgnoreErrors,
+          bounce: false,
+          body: Forward{
+              msg: msg,
+              address: ctx.sender
+          }.toCell()
+      });
   }
 }
