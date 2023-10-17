@@ -48,25 +48,22 @@ contract Task2 with Deployable {
   }
   receive(msg: Refund) {
       // sender needs to be from admin address
-      nativeThrowUnless(1, sender() == self.admin);
-      //require(sender() == self.admin, "Refund sender should be admin");
+      require(sender() == self.admin, "Refund sender should be admin");
       // return the fund back to the user
       send(SendParameters{
           to: msg.sender,
           value: 0,
-          mode: SendRemainingValue + SendIgnoreErrors,
-          bounce: false
+          mode: SendRemainingValue + SendIgnoreErrors
       });
   }
 
   receive(msg: Slice) {
-      let ctx: Context = context();
       send(SendParameters{
           to: self.admin,
           value: 0,
           mode: SendRemainingValue + SendIgnoreErrors,
-          bounce: true,
-          body: beginCell().storeAddress(ctx.sender).storeRef(msg.asCell()).endCell()
+          bounce: false,
+          body: beginCell().storeAddress(sender()).storeRef(msg.asCell()).endCell()
       });
   }
 }
