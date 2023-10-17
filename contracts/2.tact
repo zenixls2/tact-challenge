@@ -18,12 +18,7 @@ message(0x44) Refund {
   sender: Address;
 }
 
-message Forward {
-  msg: Slice;
-  address: Address;
-}
-
-contract Admin with Deployable {
+/*contract Admin with Deployable {
     queryId: Int as uint64;
     init() {
         self.queryId = 0;
@@ -42,14 +37,14 @@ contract Admin with Deployable {
         });
         self.queryId = self.queryId + 1;
     }
-}
+}*/
 
 // Proxy
 contract Task2 with Deployable {
   admin: Address;
 
   init(admin: Address) {
-    self.admin = admin;
+      self.admin = admin;
   }
   receive(msg: Refund) {
       let ctx: Context = context();
@@ -57,9 +52,9 @@ contract Task2 with Deployable {
       require(ctx.sender == self.admin, "Refund sender should be admin");
       // return the fund back to the user
       send(SendParameters{
-          to: ctx.sender,
-          value: ctx.value,
-          mode: SendIgnoreErrors,
+          to: msg.sender,
+          value: 0,
+          mode: SendRemainingValue + SendIgnoreErrors,
           bounce: false,
           body: emptyCell()
       });
@@ -69,13 +64,10 @@ contract Task2 with Deployable {
       let ctx: Context = context();
       send(SendParameters{
           to: self.admin,
-          value: ctx.value,
-          mode: SendIgnoreErrors,
-          bounce: false,
-          body: Forward{
-              msg: msg,
-              address: ctx.sender
-          }.toCell()
+          value: 0,
+          mode: SendRemainingValue + SendIgnoreErrors,
+          bounce: true,
+          body: beginCell().storeAddress(ctx.sender).storeRef(msg.asCell()).endCell()
       });
   }
 }
