@@ -102,8 +102,8 @@ contract Task3 with Deployable {
                   send(SendParameters{
                       to: self.jettonAddressB,
                       value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
+                      mode: SendRemainingValue,
+                      bounce: false,
                       body: TokenTransfer {
                           queryId: 0,
                           amount: toSend,
@@ -118,9 +118,9 @@ contract Task3 with Deployable {
                   self.bAmount = self.bAmount - toSend;
               }
           } else if sender() == self.jettonAddressB {
-              let toSend: Int = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
+              let toSend: Int = (self.aAmount * self.decimal / self.bAmount) / msg.amount * self.decimal;
               // not enough balance
-              if self.aAmount == 0 || self.bAmount == 0 ||toSend > self.aAmount {
+              if self.aAmount == 0 || self.bAmount == 0 || toSend > self.aAmount {
                   send(SendParameters{
                       to: self.jettonAddressB,
                       value: 0,
@@ -140,8 +140,8 @@ contract Task3 with Deployable {
                   send(SendParameters{
                       to: self.jettonAddressA,
                       value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
+                      mode: SendRemainingValue,
+                      bounce: false,
                       body: TokenTransfer {
                           queryId: 0,
                           amount: toSend,
