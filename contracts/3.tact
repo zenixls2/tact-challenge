@@ -68,11 +68,109 @@ contract Task3 with Deployable {
   }
 
   receive(msg: TokenNotification) {
+      //require(sender() == self.jettonAddressA || sender() == self.jettonAddressB, "illegal token");
+      // admin cannot swap, only add
+      if msg.from == self.owner {
+        if sender() == self.jettonAddressA {
+            self.aAmount = self.aAmount + msg.amount;
+        } else if sender() == self.jettonAddressB {
+            self.bAmount = self.bAmount + msg.amount;
+        }
+        throw(2);
+      } else {
+          if sender() == self.jettonAddressA {
+              let toSend: Int = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
+              if toSend > self.bAmount {
+                  send(SendParameters{
+                      to: sender(),
+                      value: 0,
+                      mode: SendRemainingValue + SendIgnoreErrors,
+                      bounce: false,
+                      body: TokenTransfer {
+                          queryId: 0,
+                          amount: msg.amount,
+                          destination: msg.from,
+                          responseDestination: myAddress(),
+                          customPayload: null,
+                          forwardTonAmount: ton("0.01"),
+                          forwardPayload: emptySlice()
+                      }.toCell()
+                  });
+              } else {
+                  send(SendParameters{
+                      to: self.jettonAddressB,
+                      value: 0,
+                      mode: SendRemainingValue,
+                      bounce: false,
+                      body: TokenTransfer {
+                          queryId: 0,
+                          amount: toSend,
+                          destination: msg.from,
+                          responseDestination: myAddress(),
+                          customPayload: null,
+                          forwardTonAmount: ton("0.01"),
+                          forwardPayload: emptySlice()
+                      }.toCell()
+                  });
+                  self.aAmount = self.aAmount + msg.amount;
+                  self.bAmount = self.bAmount - toSend;
+              }
+              return;
+          } else if sender() == self.jettonAddressB {
+              let toSend: Int = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
+              if toSend > self.aAmount {
+                  send(SendParameters{
+                      to: sender(),
+                      value: 0,
+                      mode: SendRemainingValue + SendIgnoreErrors,
+                      bounce: false,
+                      body: TokenTransfer {
+                          queryId: 0,
+                          amount: msg.amount,
+                          destination: msg.from,
+                          responseDestination: myAddress(),
+                          customPayload: null,
+                          forwardTonAmount: ton("0.01"),
+                          forwardPayload: emptySlice()
+                      }.toCell()
+                  });
+              } else {
+                  send(SendParameters{
+                      to: self.jettonAddressA,
+                      value: 0,
+                      mode: SendRemainingValue,
+                      bounce: false,
+                      body: TokenTransfer {
+                          queryId: 0,
+                          amount: toSend,
+                          destination: msg.from,
+                          responseDestination: myAddress(),
+                          customPayload: null,
+                          forwardTonAmount: ton("0.01"),
+                          forwardPayload: emptySlice()
+                      }.toCell()
+                  });
+                  self.aAmount = self.aAmount - toSend;
+                  self.bAmount = self.bAmount + msg.amount;
+              }
+              return;
+          }
+          throw(1);
+      }
+
   } 
   
   get fun price(jetton: Address): Int { 
+      if jetton == self.jettonAddressA {
+          return self.aAmount * self.decimal / self.bAmount;
+      }
+      return self.bAmount * self.decimal / self.aAmount;
   }
   
-  get fun balance(jetton: Address): Int { 
+  get fun balance(jetton: Address): Int {
+    if jetton == self.jettonAddressA {
+        return self.aAmount;
+    }
+    return self.bAmount;
   }
 }

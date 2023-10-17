@@ -1,6 +1,7 @@
 import { Blockchain, SandboxContract } from '@ton-community/sandbox';
 import { toNano } from 'ton-core';
 import { Task3 } from '../wrappers/Task3';
+import '@ton-community/test-utils';
 
 describe('Task3', () => {
     let blockchain: Blockchain;
@@ -8,7 +9,10 @@ describe('Task3', () => {
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();
-        task3 = blockchain.openContract(await Task3.fromInit());
+		const admin = await blockchain.treasury("admin");
+		const tokenA = await blockchain.treasury("tokenA");
+		const tokenB = await blockchain.treasury("tokenB");
+        task3 = blockchain.openContract(await Task3.fromInit(admin.address, tokenA.address, tokenB.address));
         const deployer = await blockchain.treasury('deployer');
         const deployResult = await task3.send(
             deployer.getSender(),
