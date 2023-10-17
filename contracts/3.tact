@@ -68,21 +68,23 @@ contract Task3 with Deployable {
   }
 
   receive(msg: TokenNotification) {
-      //require(sender() == self.jettonAddressA || sender() == self.jettonAddressB, "illegal token");
       // admin cannot swap, only add
       if msg.from == self.owner {
         if sender() == self.jettonAddressA {
             self.aAmount = self.aAmount + msg.amount;
         } else if sender() == self.jettonAddressB {
             self.bAmount = self.bAmount + msg.amount;
+        } else {
+            throw(2);
         }
-        throw(2);
       } else {
           if sender() == self.jettonAddressA {
               let toSend: Int = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
+
+              // not enough balance
               if toSend > self.bAmount {
                   send(SendParameters{
-                      to: sender(),
+                      to: self.jettonAddressA,
                       value: 0,
                       mode: SendRemainingValue + SendIgnoreErrors,
                       bounce: false,
@@ -115,12 +117,12 @@ contract Task3 with Deployable {
                   self.aAmount = self.aAmount + msg.amount;
                   self.bAmount = self.bAmount - toSend;
               }
-              return;
           } else if sender() == self.jettonAddressB {
               let toSend: Int = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
+              // not enough balance
               if toSend > self.aAmount {
                   send(SendParameters{
-                      to: sender(),
+                      to: self.jettonAddressB,
                       value: 0,
                       mode: SendRemainingValue + SendIgnoreErrors,
                       bounce: false,
@@ -153,9 +155,9 @@ contract Task3 with Deployable {
                   self.aAmount = self.aAmount - toSend;
                   self.bAmount = self.bAmount + msg.amount;
               }
-              return;
+          } else {
+            throw(1);
           }
-          throw(1);
       }
 
   } 
