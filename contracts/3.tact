@@ -82,7 +82,7 @@ contract Task3 with Deployable {
               let toSend: Int = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
 
               // not enough balance
-              if toSend > self.bAmount {
+              if self.bAmount == 0 || self.aAmount == 0 || toSend > self.bAmount {
                   send(SendParameters{
                       to: self.jettonAddressA,
                       value: 0,
@@ -120,7 +120,7 @@ contract Task3 with Deployable {
           } else if sender() == self.jettonAddressB {
               let toSend: Int = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
               // not enough balance
-              if toSend > self.aAmount {
+              if self.aAmount == 0 || self.bAmount == 0 ||toSend > self.aAmount {
                   send(SendParameters{
                       to: self.jettonAddressB,
                       value: 0,
