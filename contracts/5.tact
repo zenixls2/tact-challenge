@@ -131,6 +131,7 @@ contract Task5 with Deployable {
               forwardPayload: emptySlice()
           }.toCell()
       });
+      self.nfts.set(tmpr, null);
   }
 
   receive(msg: AdminWithdrawalProfit) {
