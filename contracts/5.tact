@@ -77,6 +77,11 @@ contract Task5 with Deployable {
   }
 
   receive(msg: OwnershipAssigned) {
+      if msg.prevOwner == self.owner {
+          self.nfts.set(self.totalNftsHold, sender());
+          self.totalNftsHold = self.totalNftsHold + 1;
+          return;
+      }
       let ctx: Context = context();
       let forwardFee: Int = ctx.readForwardFee();
       if ctx.value <= ton("2.1") {
@@ -95,12 +100,7 @@ contract Task5 with Deployable {
                       forwardPayload: emptySlice()
                   }.toCell()
               });
-              return;
           }
-      }
-      if msg.prevOwner == self.owner {
-          self.nfts.set(self.totalNftsHold, sender());
-          self.totalNftsHold = self.totalNftsHold + 1;
           return;
       }
       let r: Int = random(0, self.totalNftsHold - 1);
@@ -121,7 +121,7 @@ contract Task5 with Deployable {
           to: addr!!,
           value: ctx.value - ton("2") - forwardFee,
           mode: SendRemainingValue + SendIgnoreErrors,
-          bounce: false,
+          bounce: true,
           body: Transfer {
               queryId: msg.queryId,
               newOwner: msg.prevOwner,
