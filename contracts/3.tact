@@ -69,16 +69,17 @@ contract Task3 with Deployable {
 
   receive(msg: TokenNotification) {
       // admin cannot swap, only add
+      let s: Address = sender();
       if msg.from == self.owner {
-        if sender() == self.jettonAddressA {
+        if s == self.jettonAddressA {
             self.aAmount = self.aAmount + msg.amount;
-        } else if sender() == self.jettonAddressB {
+        } else if s == self.jettonAddressB {
             self.bAmount = self.bAmount + msg.amount;
         } else {
             throw(2);
         }
       } else {
-          if sender() == self.jettonAddressA {
+          if s == self.jettonAddressA {
 
               // not enough balance
               if self.bAmount == 0 || self.aAmount == 0 {
@@ -136,7 +137,7 @@ contract Task3 with Deployable {
                   self.aAmount = self.aAmount + msg.amount;
                   self.bAmount = self.bAmount - toSend;
               }
-          } else if sender() == self.jettonAddressB {
+          } else if s == self.jettonAddressB {
               if self.aAmount == 0 || self.bAmount == 0 {
                   send(SendParameters{
                       to: self.jettonAddressB,
@@ -153,7 +154,7 @@ contract Task3 with Deployable {
                           forwardPayload: emptySlice()
                       }.toCell()
                   });
-
+                  return;
               }
               let toSend: Int = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
               // not enough balance
