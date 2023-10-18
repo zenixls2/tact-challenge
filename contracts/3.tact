@@ -70,41 +70,39 @@ contract Task3 with Deployable {
   receive(msg: TokenNotification) {
       // admin cannot swap, only add
       let s: Address = sender();
+      require(s == self.jettonAddressA || s == self.jettonAddressB, "not match");
       if msg.from == self.owner {
-        if s == self.jettonAddressA {
-            self.aAmount = self.aAmount + msg.amount;
-        } else if s == self.jettonAddressB {
-            self.bAmount = self.bAmount + msg.amount;
-        } else {
-            throw(2);
-        }
-      } else {
           if s == self.jettonAddressA {
-
-              // not enough balance
-              if self.bAmount == 0 || self.aAmount == 0 {
-                  send(SendParameters{
-                      to: self.jettonAddressA,
-                      value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
-                      body: TokenTransfer {
-                          queryId: 0,
-                          amount: msg.amount,
-                          destination: msg.from,
-                          responseDestination: myAddress(),
-                          customPayload: null,
-                          forwardTonAmount: ton("0.01"),
-                          forwardPayload: emptySlice()
-                      }.toCell()
-                  });
-                  return;
-              }
-
+              self.aAmount = self.aAmount + msg.amount;
+          } else if s == self.jettonAddressB {
+              self.bAmount = self.bAmount + msg.amount;
+          }
+          return;
+      } else {
+          // not enough balance
+          if self.bAmount == 0 || self.aAmount == 0 {
+              send(SendParameters{
+                  to: s,
+                  value: 0,
+                  mode: SendRemainingValue + SendIgnoreErrors,
+                  bounce: true,
+                  body: TokenTransfer {
+                      queryId: 0,
+                      amount: msg.amount,
+                      destination: msg.from,
+                      responseDestination: myAddress(),
+                      customPayload: null,
+                      forwardTonAmount: ton("0.01"),
+                      forwardPayload: emptySlice()
+                  }.toCell()
+              });
+              return;
+          }
+          if s == self.jettonAddressA {
               let toSend: Int = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
               if toSend > self.bAmount {
                   send(SendParameters{
-                      to: self.jettonAddressA,
+                      to: s,
                       value: 0,
                       mode: SendRemainingValue + SendIgnoreErrors,
                       bounce: true,
@@ -137,30 +135,12 @@ contract Task3 with Deployable {
                   self.aAmount = self.aAmount + msg.amount;
                   self.bAmount = self.bAmount - toSend;
               }
-          } else if s == self.jettonAddressB {
-              if self.aAmount == 0 || self.bAmount == 0 {
-                  send(SendParameters{
-                      to: self.jettonAddressB,
-                      value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
-                      body: TokenTransfer {
-                          queryId: 0,
-                          amount: msg.amount,
-                          destination: msg.from,
-                          responseDestination: myAddress(),
-                          customPayload: null,
-                          forwardTonAmount: ton("0.01"),
-                          forwardPayload: emptySlice()
-                      }.toCell()
-                  });
-                  return;
-              }
+          } else {
               let toSend: Int = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
               // not enough balance
               if toSend > self.aAmount {
                   send(SendParameters{
-                      to: self.jettonAddressB,
+                      to: s,
                       value: 0,
                       mode: SendRemainingValue + SendIgnoreErrors,
                       bounce: true,
@@ -193,8 +173,6 @@ contract Task3 with Deployable {
                   self.aAmount = self.aAmount - toSend;
                   self.bAmount = self.bAmount + msg.amount;
               }
-          } else {
-            throw(1);
           }
       }
 
