@@ -56,6 +56,9 @@ contract Task3 with Deployable {
   bAmount: Int;
   jettonAddressA: Address;
   jettonAddressB: Address;
+  paramA: SendParameters;
+  paramB: SendParameters;
+  cache: TokenTransfer;
 
   init(admin: Address, newJettonAddressA: Address, newJettonAddressB: Address) {
     self.owner = admin;
@@ -63,6 +66,29 @@ contract Task3 with Deployable {
     self.jettonAddressB = newJettonAddressB;
     self.aAmount = 0;
     self.bAmount = 0;
+    self.paramA = SendParameters{
+        to: newJettonAddressA,
+        value: 0,
+        mode: SendRemainingValue + SendIgnoreErrors,
+        bounce: true,
+        body: emptyCell()
+    };
+    self.paramB = SendParameters{
+        to: newJettonAddressB,
+        value: 0,
+        mode: SendRemainingValue + SendIgnoreErrors,
+        bounce: true,
+        body: emptyCell()
+    };
+    self.cache = TokenTransfer{
+        queryId: 0,
+        amount: 0,
+        destination: myAddress(),
+        responseDestination: myAddress(),
+        customPayload: null,
+        forwardTonAmount: ton("0.01"),
+        forwardPayload: emptySlice()
+    };
   }
 
   receive(msg: TokenNotification) {
@@ -81,57 +107,29 @@ contract Task3 with Deployable {
       } else {
           // not enough balance
           if self.bAmount == 0 || self.aAmount == 0 {
+              self.cache.amount = msg.amount;
+              self.cache.destination = msg.from;
               send(SendParameters{
                   to: s,
                   value: 0,
                   mode: SendRemainingValue + SendIgnoreErrors,
                   bounce: true,
-                  body: TokenTransfer {
-                      queryId: 0,
-                      amount: msg.amount,
-                      destination: msg.from,
-                      responseDestination: myAddress(),
-                      customPayload: null,
-                      forwardTonAmount: ton("0.01"),
-                      forwardPayload: emptySlice()
-                  }.toCell()
+                  body: self.cache.toCell()
               });
               return;
           }
           if cmpA {
               let toSend: Int = (self.bAmount * 1000000000 / self.aAmount) * msg.amount / 1000000000;
               if toSend > self.bAmount {
-                  send(SendParameters{
-                      to: s,
-                      value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
-                      body: TokenTransfer {
-                          queryId: 0,
-                          amount: msg.amount,
-                          destination: msg.from,
-                          responseDestination: myAddress(),
-                          customPayload: null,
-                          forwardTonAmount: ton("0.01"),
-                          forwardPayload: emptySlice()
-                      }.toCell()
-                  });
+                  self.cache.amount = msg.amount;
+                  self.cache.destination = msg.from;
+                  self.paramA.body = self.cache.toCell();
+                  send(self.paramA);
               } else {
-                  send(SendParameters{
-                      to: self.jettonAddressB,
-                      value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
-                      body: TokenTransfer {
-                          queryId: 0,
-                          amount: toSend,
-                          destination: msg.from,
-                          responseDestination: myAddress(),
-                          customPayload: null,
-                          forwardTonAmount: ton("0.01"),
-                          forwardPayload: emptySlice()
-                      }.toCell()
-                  });
+                  self.cache.amount = toSend;
+                  self.cache.destination = msg.from;
+                  self.paramB.body = self.cache.toCell();
+                  send(self.paramB);
                   self.aAmount = self.aAmount + msg.amount;
                   self.bAmount = self.bAmount - toSend;
               }
@@ -139,37 +137,15 @@ contract Task3 with Deployable {
               let toSend: Int = (self.aAmount * 1000000000 / self.bAmount) * msg.amount / 1000000000;
               // not enough balance
               if toSend > self.aAmount {
-                  send(SendParameters{
-                      to: s,
-                      value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
-                      body: TokenTransfer {
-                          queryId: 0,
-                          amount: msg.amount,
-                          destination: msg.from,
-                          responseDestination: myAddress(),
-                          customPayload: null,
-                          forwardTonAmount: ton("0.01"),
-                          forwardPayload: emptySlice()
-                      }.toCell()
-                  });
+                  self.cache.amount = msg.amount;
+                  self.cache.destination = msg.from;
+                  self.paramB.body = self.cache.toCell();
+                  send(self.paramB);
               } else {
-                  send(SendParameters{
-                      to: self.jettonAddressA,
-                      value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
-                      body: TokenTransfer {
-                          queryId: 0,
-                          amount: toSend,
-                          destination: msg.from,
-                          responseDestination: myAddress(),
-                          customPayload: null,
-                          forwardTonAmount: ton("0.01"),
-                          forwardPayload: emptySlice()
-                      }.toCell()
-                  });
+                  self.cache.amount = toSend;
+                  self.cache.destination = msg.from;
+                  self.paramA.body = self.cache.toCell();
+                  send(self.paramA);
                   self.aAmount = self.aAmount - toSend;
                   self.bAmount = self.bAmount + msg.amount;
               }
