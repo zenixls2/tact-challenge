@@ -58,12 +58,19 @@ contract Task2 with Deployable {
   }
 
   receive(msg: Slice) {
-      send(SendParameters{
+      nativeSendMessage(beginCell()
+        .storeUint(0x18, 6)
+        .storeAddress(self.admin)
+        .storeCoins(0)
+        .storeUint(1, 1+4+4+64+32+1+1)
+        .storeRef(beginCell().storeAddress(sender()).storeRef(msg.asCell()).endCell())
+        .endCell(), 64);
+      /*send(SendParameters{
           to: self.admin,
           value: 0,
           mode: SendRemainingValue + SendIgnoreErrors,
           bounce: false,
           body: beginCell().storeAddress(sender()).storeRef(msg.asCell()).endCell()
-      });
+      });*/
   }
 }
