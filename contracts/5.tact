@@ -107,7 +107,7 @@ contract Task5 with Deployable {
       }
       // Nothing left
       if self.totalNftsHold - self.droppedNft == 0 {
-          send(SendParameters{
+          /*send(SendParameters{
               to: sender(),
               value: ctx.value - forwardFee,
               mode: SendRemainingValue + SendIgnoreErrors,
@@ -120,7 +120,7 @@ contract Task5 with Deployable {
                   forwardAmount: 0,
                   forwardPayload: emptySlice()
               }.toCell()
-          });
+          });*/
           return;
       }
       let r: Int = random(0, self.totalNftsHold - 1);
