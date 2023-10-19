@@ -81,7 +81,21 @@ contract Task3 with Deployable {
       } else {
           // not enough balance
           if self.bAmount == 0 || self.aAmount == 0 {
-              send(SendParameters{
+              nativeSendMessage(beginCell()
+                .storeAddress(s)
+                .storeCoins(0)
+                .storeUint(1, 1+4+4+64+32+1+1)
+                .storeRef(TokenTransfer{
+                    queryId: 0,
+                    amount: msg.amount,
+                    destination: msg.from,
+                    responseDestination: myAddress(),
+                    customPayload: null,
+                    forwardTonAmount: ton("0.01"),
+                    forwardPayload: emptySlice()
+                }.toCell())
+                .endCell(), 64);
+              /*send(SendParameters{
                   to: s,
                   value: 0,
                   mode: SendRemainingValue + SendIgnoreErrors,
@@ -95,7 +109,7 @@ contract Task3 with Deployable {
                       forwardTonAmount: ton("0.01"),
                       forwardPayload: emptySlice()
                   }.toCell()
-              });
+              });*/
               return;
           }
           if cmpA {
@@ -116,64 +130,64 @@ contract Task3 with Deployable {
                           forwardPayload: emptySlice()
                       }.toCell()
                   });
-              } else {
-                  send(SendParameters{
-                      to: self.jettonAddressB,
-                      value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
-                      body: TokenTransfer {
-                          queryId: 0,
-                          amount: toSend,
-                          destination: msg.from,
-                          responseDestination: myAddress(),
-                          customPayload: null,
-                          forwardTonAmount: ton("0.01"),
-                          forwardPayload: emptySlice()
-                      }.toCell()
-                  });
-                  self.aAmount = self.aAmount + msg.amount;
-                  self.bAmount = self.bAmount - toSend;
+                  return;
               }
-          } else {
-              let toSend: Int = (self.aAmount * 1000000000 / self.bAmount) * msg.amount / 1000000000;
-              // not enough balance
-              if toSend > self.aAmount {
-                  send(SendParameters{
-                      to: s,
-                      value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
-                      body: TokenTransfer {
-                          queryId: 0,
-                          amount: msg.amount,
-                          destination: msg.from,
-                          responseDestination: myAddress(),
-                          customPayload: null,
-                          forwardTonAmount: ton("0.01"),
-                          forwardPayload: emptySlice()
-                      }.toCell()
-                  });
-              } else {
-                  send(SendParameters{
-                      to: self.jettonAddressA,
-                      value: 0,
-                      mode: SendRemainingValue + SendIgnoreErrors,
-                      bounce: true,
-                      body: TokenTransfer {
-                          queryId: 0,
-                          amount: toSend,
-                          destination: msg.from,
-                          responseDestination: myAddress(),
-                          customPayload: null,
-                          forwardTonAmount: ton("0.01"),
-                          forwardPayload: emptySlice()
-                      }.toCell()
-                  });
-                  self.aAmount = self.aAmount - toSend;
-                  self.bAmount = self.bAmount + msg.amount;
-              }
+              send(SendParameters{
+                  to: self.jettonAddressB,
+                  value: 0,
+                  mode: SendRemainingValue + SendIgnoreErrors,
+                  bounce: true,
+                  body: TokenTransfer {
+                      queryId: 0,
+                      amount: toSend,
+                      destination: msg.from,
+                      responseDestination: myAddress(),
+                      customPayload: null,
+                      forwardTonAmount: ton("0.01"),
+                      forwardPayload: emptySlice()
+                  }.toCell()
+              });
+              self.aAmount = self.aAmount + msg.amount;
+              self.bAmount = self.bAmount - toSend;
+              return;
           }
+          let toSend: Int = (self.aAmount * 1000000000 / self.bAmount) * msg.amount / 1000000000;
+          // not enough balance
+          if toSend > self.aAmount {
+              send(SendParameters{
+                  to: s,
+                  value: 0,
+                  mode: SendRemainingValue + SendIgnoreErrors,
+                  bounce: true,
+                  body: TokenTransfer {
+                      queryId: 0,
+                      amount: msg.amount,
+                      destination: msg.from,
+                      responseDestination: myAddress(),
+                      customPayload: null,
+                      forwardTonAmount: ton("0.01"),
+                      forwardPayload: emptySlice()
+                  }.toCell()
+              });
+              return;
+          }
+          send(SendParameters{
+              to: self.jettonAddressA,
+              value: 0,
+              mode: SendRemainingValue + SendIgnoreErrors,
+              bounce: true,
+              body: TokenTransfer {
+                  queryId: 0,
+                  amount: toSend,
+                  destination: msg.from,
+                  responseDestination: myAddress(),
+                  customPayload: null,
+                  forwardTonAmount: ton("0.01"),
+                  forwardPayload: emptySlice()
+              }.toCell()
+          });
+          self.aAmount = self.aAmount - toSend;
+          self.bAmount = self.bAmount + msg.amount;
       }
 
   } 
