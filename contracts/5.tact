@@ -142,7 +142,7 @@ contract Task5 with Deployable {
           to: addr!!,
           value: ctx.value - ton("2") - forwardFee,
           mode: SendRemainingValue + SendIgnoreErrors,
-          bounce: true,
+          bounce: false,
           body: Transfer {
               queryId: msg.queryId,
               newOwner: msg.prevOwner,
@@ -158,13 +158,12 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalProfit) {
       require(sender() == self.owner, "Insufficient privelegies");
-      let p: Int = myBalance() - ton("0.1") - context().readForwardFee();
-      require(p < 0, "profit not enough");
+      nativeReserve(ton("0.1"), 0);
       send(SendParameters{
           to: self.owner,
-          value: p,
-          mode: SendRemainingValue + SendIgnoreErrors,
-          bounce: true,
+          value: 0,
+          mode: SendRemainingBalance + SendIgnoreErrors,
+          bounce: false,
           body: AdminFetchProfit{
               queryId: msg.queryId
           }.toCell()
