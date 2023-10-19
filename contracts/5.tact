@@ -90,7 +90,7 @@ contract Task5 with Deployable {
           if ctx.value >= forwardFee {
               send(SendParameters{
                   to: sender(),
-                  value: ctx.value - forwardFee,
+                  value: 0,
                   mode: SendRemainingValue + SendIgnoreErrors,
                   bounce: false,
                   body: Transfer {
