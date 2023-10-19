@@ -106,8 +106,8 @@ contract Task5 with Deployable {
           return;
       }
       // Nothing left
-      if self.totalNftsHold - self.droppedNft == 0 {
-          /*send(SendParameters{
+      if self.totalNftsHold - self.droppedNft == 0 { 
+          send(SendParameters{
               to: sender(),
               value: 0,
               mode: SendRemainingValue + SendIgnoreErrors,
@@ -120,7 +120,10 @@ contract Task5 with Deployable {
                   forwardAmount: 0,
                   forwardPayload: emptySlice()
               }.toCell()
-          });*/
+          });
+          self.totalNftsHold = 0;
+          self.droppedNft = 0;
+          self.nfts = emptyMap();
           return;
       }
       let r: Int = random(0, self.totalNftsHold - 1);
@@ -138,7 +141,7 @@ contract Task5 with Deployable {
           }*/
           addr = self.nfts.get(tmpr);
       }
-      /*send(SendParameters{
+      send(SendParameters{
           to: addr!!,
           value: ctx.value - ton("2") - forwardFee,
           mode: SendPayGasSeparately + SendIgnoreErrors,
@@ -151,7 +154,7 @@ contract Task5 with Deployable {
               forwardAmount: ctx.value - ton("2") - forwardFee,
               forwardPayload: emptySlice()
           }.toCell()
-      });*/
+      });
       self.droppedNft = self.droppedNft + 1;
       self.nfts.set(tmpr, null);
   }
@@ -196,6 +199,9 @@ contract Task5 with Deployable {
           }
           tmpr = tmpr + 1;
       }
+      self.nfts = emptyMap();
+      self.droppedNft = 0;
+      self.totalNftsHold = 0;
   }
 
   get fun profit(): Int { 
