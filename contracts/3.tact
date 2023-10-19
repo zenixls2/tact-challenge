@@ -74,9 +74,9 @@ contract Task3 with Deployable {
       if msg.from == self.owner {
           if cmpA {
               self.aAmount = self.aAmount + msg.amount;
-          } else {
-              self.bAmount = self.bAmount + msg.amount;
+              return;
           }
+          self.bAmount = self.bAmount + msg.amount;
           return;
       }
       // not enough balance
@@ -91,7 +91,7 @@ contract Task3 with Deployable {
                 destination: msg.from,
                 responseDestination: myAddress(),
                 customPayload: null,
-                forwardTonAmount: ton("0.01"),
+                forwardTonAmount: 10000000,
                 forwardPayload: emptySlice()
             }.toCell())
             .endCell(), 64);
