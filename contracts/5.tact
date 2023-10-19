@@ -184,7 +184,7 @@ contract Task5 with Deployable {
                   to: addr!!,
                   value: 0,
                   mode: SendRemainingValue + SendIgnoreErrors,
-                  bounce: true,
+                  bounce: false,
                   body: Transfer {
                       queryId: msg.queryId,
                       newOwner: sender(),
