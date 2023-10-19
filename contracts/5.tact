@@ -182,7 +182,7 @@ contract Task5 with Deployable {
               send(SendParameters{
                   to: addr!!,
                   value: 0,
-                  mode: SendRemainingValue + SendIgnoreErrors,
+                  mode: SendPayGasSeparately + SendIgnoreErrors,
                   bounce: false,
                   body: Transfer {
                       queryId: msg.queryId,
