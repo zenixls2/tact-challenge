@@ -69,11 +69,13 @@ contract Task5 with Deployable {
   owner: Address;
   nfts: map<Int as uint16, Address>;
   totalNftsHold: Int;
+  droppedNft: Int;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
     self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
     self.totalNftsHold = 0;
+    self.droppedNft = 0;
   }
 
   receive(msg: OwnershipAssigned) {
@@ -103,6 +105,24 @@ contract Task5 with Deployable {
           }
           return;
       }
+      // Nothing left
+      if self.totalNftsHold - self.droppedNft == 0 {
+          send(SendParameters{
+              to: sender(),
+              value: 0,
+              mode: SendRemainingValue + SendIgnoreErrors,
+              bounce: false,
+              body: Transfer {
+                  queryId: msg.queryId,
+                  newOwner: msg.prevOwner,
+                  responseDestination: msg.prevOwner,
+                  customPayload: null,
+                  forwardAmount: 0,
+                  forwardPayload: emptySlice()
+              }.toCell()
+          });
+          return;
+      }
       let r: Int = random(0, self.totalNftsHold - 1);
       let tmpr: Int = r;
       let addr: Address? = self.nfts.get(r);
@@ -111,10 +131,11 @@ contract Task5 with Deployable {
           if tmpr >= self.totalNftsHold {
               tmpr = 0;
           }
+          /* // unreachable
           if tmpr == r {
               // nothing left
               return;
-          }
+          }*/
           addr = self.nfts.get(tmpr);
       }
       send(SendParameters{
@@ -131,6 +152,7 @@ contract Task5 with Deployable {
               forwardPayload: emptySlice()
           }.toCell()
       });
+      self.droppedNft = self.droppedNft + 1;
       self.nfts.set(tmpr, null);
   }
 
@@ -151,8 +173,30 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalAllNFTs) {
       let ctx: Context = context();
-      require(ctx.value > 100000000 + self.totalNftsHold * 80000000, "Insufficent funds");
+      require(ctx.value > 100000000 + (self.totalNftsHold - self.droppedNft) * 80000000, "Insufficent funds");
       require(sender() == self.owner, "Invalid sender");
+      let tmpr: Int = 0;
+      let addr: Address? = null;
+      while (tmpr < self.totalNftsHold) {
+          addr = self.nfts.get(tmpr);
+          if addr != null {
+              send(SendParameters{
+                  to: addr!!,
+                  value: 0,
+                  mode: SendRemainingValue + SendIgnoreErrors,
+                  bounce: true,
+                  body: Transfer {
+                      queryId: msg.queryId,
+                      newOwner: sender(),
+                      responseDestination: sender(),
+                      customPayload: null,
+                      forwardAmount: 0,
+                      forwardPayload: emptySlice()
+                  }.toCell()
+              });
+          }
+          tmpr = tmpr + 1;
+      }
   }
 
   get fun profit(): Int { 
