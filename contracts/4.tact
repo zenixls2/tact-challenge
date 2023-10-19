@@ -100,7 +100,22 @@ contract Task4 with Deployable {
           return;
       }
       //require(self.address == msg.nftAddress, "Invalid address");
-      send(SendParameters{
+      nativeSendMessage(beginCell()
+          .storeUint(0x18, 6)
+          .storeAddress(msg.nftAddress)
+          .storeCoins(0)
+          .storeUint(1, 1+4+4+64+32+1+1)
+          .storeRef(Transfer {
+              queryId: msg.queryId,
+              newOwner: sender(),
+              responseDestination: sender(),
+              customPayload: null,
+              forwardAmount: 0,
+              forwardPayload: emptySlice()
+          }.toCell())
+          .endCell(), 64);
+
+      /*send(SendParameters{
           to: msg.nftAddress,
           value: 0,
           mode: SendRemainingValue + SendIgnoreErrors,
@@ -113,7 +128,7 @@ contract Task4 with Deployable {
               forwardAmount: 0,
               forwardPayload: emptySlice()
           }.toCell()
-      });
+      });*/
       self.owner = null;
       self.address = null;
   }
