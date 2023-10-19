@@ -79,7 +79,7 @@ contract Task3 with Deployable {
           return;
       }
       // not enough balance
-      if self.bAmount == 0 || self.aAmount == 0 {
+      if self.bAmount * self.aAmount == 0 {
           nativeSendMessage(beginCell()
             .storeAddress(s)
             .storeCoins(0)
