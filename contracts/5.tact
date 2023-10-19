@@ -91,7 +91,7 @@ contract Task5 with Deployable {
               send(SendParameters{
                   to: sender(),
                   value: ctx.value - forwardFee,
-                  mode: SendIgnoreErrors,
+                  mode: SendRemainingValue + SendIgnoreErrors,
                   bounce: false,
                   body: Transfer {
                       queryId: msg.queryId,
@@ -110,7 +110,7 @@ contract Task5 with Deployable {
           send(SendParameters{
               to: sender(),
               value: ctx.value - forwardFee,
-              mode: SendIgnoreErrors,
+              mode: SendRemainingValue + SendIgnoreErrors,
               bounce: false,
               body: Transfer {
                   queryId: msg.queryId,
@@ -163,7 +163,7 @@ contract Task5 with Deployable {
       send(SendParameters{
           to: self.owner,
           value: p,
-          mode: SendIgnoreErrors,
+          mode: SendRemainingValue + SendIgnoreErrors,
           bounce: true,
           body: AdminFetchProfit{
               queryId: msg.queryId
