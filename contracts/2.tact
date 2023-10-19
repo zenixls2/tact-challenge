@@ -50,11 +50,19 @@ contract Task2 with Deployable {
       // sender needs to be from admin address
       require(sender() == self.admin, "Refund sender should be admin");
       // return the fund back to the user
-      send(SendParameters{
+      nativeSendMessage(beginCell()
+        .storeUint(0x18, 6)
+        .storeAddress(msg.sender)
+        .storeCoins(0)
+        .storeUint(1, 1+4+4+64+32+1+1)
+        .storeRef(emptyCell())
+        .endCell(), 64);
+
+      /*send(SendParameters{
           to: msg.sender,
           value: 0,
           mode: SendRemainingValue + SendIgnoreErrors
-      });
+      });*/
   }
 
   receive(msg: Slice) {
