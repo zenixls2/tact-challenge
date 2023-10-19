@@ -86,12 +86,12 @@ contract Task5 with Deployable {
       }
       let ctx: Context = context();
       let forwardFee: Int = ctx.readForwardFee();
-      if ctx.value <= ton("2.1") {
+      if ctx.value < ton("2.1") {
           if ctx.value >= forwardFee {
               send(SendParameters{
                   to: sender(),
-                  value: 0,
-                  mode: SendRemainingValue + SendIgnoreErrors,
+                  value: ctx.value - forwardFee,
+                  mode: SendIgnoreErrors,
                   bounce: false,
                   body: Transfer {
                       queryId: msg.queryId,
@@ -109,8 +109,8 @@ contract Task5 with Deployable {
       if self.totalNftsHold - self.droppedNft == 0 {
           send(SendParameters{
               to: sender(),
-              value: 0,
-              mode: SendRemainingValue + SendIgnoreErrors,
+              value: ctx.value - forwardFee,
+              mode: SendIgnoreErrors,
               bounce: false,
               body: Transfer {
                   queryId: msg.queryId,
@@ -141,7 +141,7 @@ contract Task5 with Deployable {
       send(SendParameters{
           to: addr!!,
           value: ctx.value - ton("2") - forwardFee,
-          mode: SendRemainingValue + SendIgnoreErrors,
+          mode: SendIgnoreErrors,
           bounce: true,
           body: Transfer {
               queryId: msg.queryId,
@@ -163,7 +163,7 @@ contract Task5 with Deployable {
       send(SendParameters{
           to: self.owner,
           value: p,
-          mode: SendRemainingValue + SendIgnoreErrors,
+          mode: SendIgnoreErrors,
           bounce: true,
           body: AdminFetchProfit{
               queryId: msg.queryId
