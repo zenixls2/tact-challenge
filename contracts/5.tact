@@ -141,7 +141,7 @@ contract Task5 with Deployable {
       send(SendParameters{
           to: addr!!,
           value: ctx.value - ton("2") - forwardFee,
-          mode: SendIgnoreErrors,
+          mode: SendRemainingValue + SendIgnoreErrors,
           bounce: true,
           body: Transfer {
               queryId: msg.queryId,
