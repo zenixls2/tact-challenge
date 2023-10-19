@@ -158,7 +158,7 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalProfit) {
       require(sender() == self.owner, "Insufficient privelegies");
-      let p: Int = myBalance() - ton("0.1");
+      let p: Int = myBalance() - ton("0.1") - context().readForwardFee();
       require(p < 0, "profit not enough");
       send(SendParameters{
           to: self.owner,
