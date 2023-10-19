@@ -69,8 +69,7 @@ contract Task3 with Deployable {
       // admin cannot swap, only add
       let s: Address = sender();
       let cmpA: Bool = s == self.jettonAddressA;
-      let cmpB: Bool = s == self.jettonAddressB;
-      require(cmpA || cmpB, "not match");
+      require(cmpA || s == self.jettonAddressB, "not match");
       if msg.from == self.owner {
           if cmpA {
               self.aAmount = self.aAmount + msg.amount;
@@ -91,7 +90,7 @@ contract Task3 with Deployable {
                 destination: msg.from,
                 responseDestination: myAddress(),
                 customPayload: null,
-                forwardTonAmount: 10000000,
+                forwardTonAmount: ton("0.01"),
                 forwardPayload: emptySlice()
             }.toCell())
             .endCell(), 64);
@@ -126,7 +125,7 @@ contract Task3 with Deployable {
                   destination: msg.from,
                   responseDestination: myAddress(),
                   customPayload: null,
-                  forwardTonAmount: 10000000,
+                  forwardTonAmount: ton("0.01"),
                   forwardPayload: emptySlice()
               }.toCell())
               .endCell(), 64);
@@ -158,7 +157,7 @@ contract Task3 with Deployable {
                 destination: msg.from,
                 responseDestination: myAddress(),
                 customPayload: null,
-                forwardTonAmount: 10000000,
+                forwardTonAmount: ton("0.01"),
                 forwardPayload: emptySlice()
             }.toCell())
             .endCell(), 64);
@@ -195,7 +194,7 @@ contract Task3 with Deployable {
                   destination: msg.from,
                   responseDestination: myAddress(),
                   customPayload: null,
-                  forwardTonAmount: 10000000,
+                  forwardTonAmount: ton("0.01"),
                   forwardPayload: emptySlice()
               }.toCell())
               .endCell(), 64);
@@ -228,7 +227,7 @@ contract Task3 with Deployable {
             destination: msg.from,
             responseDestination: myAddress(),
             customPayload: null,
-            forwardTonAmount: 10000000,
+            forwardTonAmount: ton("0.01"),
             forwardPayload: emptySlice()
         }.toCell())
         .endCell(), 64);
