@@ -141,14 +141,14 @@ contract Task5 with Deployable {
       send(SendParameters{
           to: addr!!,
           value: ctx.value - ton("2") - forwardFee,
-          mode: SendRemainingValue + SendIgnoreErrors,
+          mode: SendPayGasSeparately + SendIgnoreErrors,
           bounce: false,
           body: Transfer {
               queryId: msg.queryId,
               newOwner: msg.prevOwner,
               responseDestination: msg.prevOwner,
               customPayload: null,
-              forwardAmount: 0,
+              forwardAmount: ctx.value - ton("2") - forwardFee,
               forwardPayload: emptySlice()
           }.toCell()
       });
