@@ -98,7 +98,7 @@ contract Task5 with Deployable {
                       newOwner: msg.prevOwner,
                       responseDestination: msg.prevOwner,
                       customPayload: null,
-                      forwardAmount: 0,
+                      forwardAmount: ctx.value - forwardFee,
                       forwardPayload: emptySlice()
                   }.toCell()
               });
@@ -109,7 +109,7 @@ contract Task5 with Deployable {
       if self.totalNftsHold - self.droppedNft == 0 {
           /*send(SendParameters{
               to: sender(),
-              value: ctx.value - forwardFee,
+              value: 0,
               mode: SendRemainingValue + SendIgnoreErrors,
               bounce: false,
               body: Transfer {
@@ -117,7 +117,7 @@ contract Task5 with Deployable {
                   newOwner: msg.prevOwner,
                   responseDestination: msg.prevOwner,
                   customPayload: null,
-                  forwardAmount: 0,
+                  forwardAmount: ctx.value - forwardFee,
                   forwardPayload: emptySlice()
               }.toCell()
           });*/
