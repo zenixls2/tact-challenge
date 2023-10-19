@@ -58,7 +58,21 @@ contract Task4 with Deployable {
 
   receive(msg: OwnershipAssigned) {
       if self.owner != null {
-          send(SendParameters{
+          nativeSendMessage(beginCell()
+            .storeUint(0x18, 6)
+            .storeAddress(sender())
+            .storeCoins(0)
+            .storeUint(1, 1+4+4+64+32+1+1)
+            .storeRef(Transfer {
+                  queryId: msg.queryId,
+                  newOwner: msg.prevOwner,
+                  responseDestination: msg.prevOwner,
+                  customPayload: null,
+                  forwardAmount: 0,
+                  forwardPayload: emptySlice()
+              }.toCell())
+            .endCell(), 64);
+          /*send(SendParameters{
               to: sender(),
               value: 0,
               mode: SendRemainingValue + SendIgnoreErrors,
@@ -71,7 +85,7 @@ contract Task4 with Deployable {
                   forwardAmount: 0,
                   forwardPayload: emptySlice()
               }.toCell()
-          });
+          });*/
           return;
       }
       self.time = now() + msg.forwardPayload.loadUint(32);
