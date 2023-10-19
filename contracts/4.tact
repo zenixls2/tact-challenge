@@ -59,20 +59,19 @@ contract Task4 with Deployable {
   receive(msg: OwnershipAssigned) {
       if self.owner != null {
           nativeSendMessage(beginCell()
-            .storeUint(0x18, 6)
-            .storeAddress(sender())
-            .storeCoins(0)
-            .storeUint(1, 1+4+4+64+32+1+1)
-            .storeRef(beginCell()
-                .storeUint(0x5fcc3d14, 6)
-                .storeInt(msg.queryId, 64)
-                .storeAddress(msg.prevOwner)
-                .storeAddress(msg.prevOwner)
-                .storeRef(emptyCell())
-                .storeCoins(0)
-                .storeSlice(emptySlice())
-                .endCell())
-            .endCell(), 64);
+              .storeUint(0x18, 6)
+              .storeAddress(sender())
+              .storeCoins(0)
+              .storeUint(1, 1+4+4+64+32+1+1)
+              .storeRef(Transfer {
+                  queryId: msg.queryId,
+                  newOwner: msg.prevOwner,
+                  responseDestination: msg.prevOwner,
+                  customPayload: null,
+                  forwardAmount: 0,
+                  forwardPayload: emptySlice()
+              }.toCell())
+              .endCell(), 64);
           /*send(SendParameters{
               to: sender(),
               value: 0,
