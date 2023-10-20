@@ -87,20 +87,22 @@ contract Task5 with Deployable {
       let ctx: Context = context();
       let forwardFee: Int = ctx.readForwardFee();
       if ctx.value < ton("2.1") {
-          send(SendParameters{
-              to: sender(),
-              value: 0,
-              mode: SendRemainingValue + SendIgnoreErrors,
-              bounce: false,
-              body: Transfer {
-                  queryId: msg.queryId,
-                  newOwner: msg.prevOwner,
-                  responseDestination: msg.prevOwner,
-                  customPayload: null,
-                  forwardAmount: 0,
-                  forwardPayload: emptySlice()
-              }.toCell()
-          });
+          if ctx.value >= forwardFee {
+              send(SendParameters{
+                  to: sender(),
+                  value: 0,
+                  mode: SendRemainingValue + SendIgnoreErrors,
+                  bounce: false,
+                  body: Transfer {
+                      queryId: msg.queryId,
+                      newOwner: msg.prevOwner,
+                      responseDestination: msg.prevOwner,
+                      customPayload: null,
+                      forwardAmount: 0,
+                      forwardPayload: msg.forwardPayload
+                  }.toCell()
+              });
+          }
           return;
       }
       // Nothing left
@@ -116,7 +118,7 @@ contract Task5 with Deployable {
                   responseDestination: msg.prevOwner,
                   customPayload: null,
                   forwardAmount: 0,
-                  forwardPayload: emptySlice()
+                  forwardPayload: msg.forwardPayload
               }.toCell()
           });
           self.totalNftsHold = 0;
