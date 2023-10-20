@@ -69,13 +69,11 @@ contract Task5 with Deployable {
   owner: Address;
   nfts: map<Int as uint16, Address>;
   totalNftsHold: Int;
-  droppedNft: Int;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
     self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
     self.totalNftsHold = 0;
-    self.droppedNft = 0;
   }
 
   receive(msg: OwnershipAssigned) {
@@ -106,7 +104,7 @@ contract Task5 with Deployable {
           return;
       }
       // Nothing left
-      if self.totalNftsHold - self.droppedNft == 0 { 
+      if self.totalNftsHold == 0 { 
           send(SendParameters{
               to: sender(),
               value: 0,
@@ -122,7 +120,6 @@ contract Task5 with Deployable {
               }.toCell()
           });
           self.totalNftsHold = 0;
-          self.droppedNft = 0;
           self.nfts = emptyMap();
           return;
       }
@@ -141,7 +138,7 @@ contract Task5 with Deployable {
           }*/
           addr = self.nfts.get(tmpr);
       }
-      /*send(SendParameters{
+      send(SendParameters{
           to: addr!!,
           value: ctx.value - ton("2") - forwardFee,
           mode: SendPayGasSeparately + SendIgnoreErrors,
@@ -154,9 +151,8 @@ contract Task5 with Deployable {
               forwardAmount: ctx.value - ton("2") - forwardFee,
               forwardPayload: emptySlice()
           }.toCell()
-      });*/
-      self.droppedNft = self.droppedNft + 1;
-      self.nfts.set(tmpr, null);
+      });
+      self.nfts.set(tmpr, sender());
   }
 
   receive(msg: AdminWithdrawalProfit) {
@@ -175,7 +171,7 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalAllNFTs) {
       let ctx: Context = context();
-      require(ctx.value >= ton("1") + (self.totalNftsHold - self.droppedNft) * ton("0.08"), "Insufficent funds");
+      require(ctx.value >= ton("1") + self.totalNftsHold * ton("0.08"), "Insufficent funds");
       require(sender() == self.owner, "Invalid sender");
       let tmpr: Int = 0;
       while (tmpr < self.totalNftsHold) {
@@ -195,14 +191,11 @@ contract Task5 with Deployable {
                       forwardPayload: emptySlice()
                   }.toCell()
               });
-              self.droppedNft = self.droppedNft + 1;
-              self.nfts.set(tmpr, null);
           }
           tmpr = tmpr + 1;
       }
-      //self.nfts = emptyMap();
-      //self.droppedNft = 0;
-      //self.totalNftsHold = 0;
+      self.nfts = emptyMap();
+      self.totalNftsHold = 0;
   }
 
   get fun profit(): Int { 
@@ -217,12 +210,8 @@ contract Task5 with Deployable {
       return self.nfts;
   }
 
-  /*get fun totalNftsHold(): Int {
+  get fun totalNftsHold(): Int {
     return self.totalNftsHold;
-  }
-
-  get fun droppedNft(): Int {
-    return self.droppedNft;
   }
 
   get fun Balance(): Int {
@@ -231,5 +220,5 @@ contract Task5 with Deployable {
 
   get fun owner(): Address {
     return self.owner;
-  }*/
+  }
 }
