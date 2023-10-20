@@ -204,7 +204,11 @@ contract Task5 with Deployable {
   }
 
   get fun profit(): Int { 
-      return myBalance() - ton("0.1");
+      let result: Int = myBalance() - ton("0.1");
+      if result > 0 {
+        return result;
+      }
+      return 0;
   }
   
   get fun nfts(): map<Int as uint16, Address> {
