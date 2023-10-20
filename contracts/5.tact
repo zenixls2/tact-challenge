@@ -76,37 +76,37 @@ contract Task5 with Deployable {
     self.totalNftsHold = 0;
   }
 
-  receive(msg: OwnershipAssigned) {
-      if msg.prevOwner == self.owner {
-          self.nfts.set(self.totalNftsHold, sender());
-          self.totalNftsHold = self.totalNftsHold + 1;
-          return;
-      }
+  receive(msg: OwnershipAssigned) { 
       let ctx: Context = context();
       let forwardFee: Int = ctx.readForwardFee();
       if ctx.value < ton("2.1") {
           if ctx.value >= ton("0.1") {
               send(SendParameters{
                   to: sender(),
-                  value: 0,
-                  mode: SendRemainingValue + SendIgnoreErrors,
+                  value: ctx.value - forwardFee,
+                  mode: SendPayGasSeparately + SendIgnoreErrors,
                   bounce: false,
                   body: Transfer {
                       queryId: msg.queryId,
                       newOwner: msg.prevOwner,
                       responseDestination: msg.prevOwner,
                       customPayload: null,
-                      forwardAmount: 0,
+                      forwardAmount: ctx.value - forwardFee,
                       forwardPayload: emptySlice()
                   }.toCell()
               });
           }
           return;
       }
+      if msg.prevOwner == self.owner {
+          self.nfts.set(self.totalNftsHold, sender());
+          self.totalNftsHold = self.totalNftsHold + 1;
+          return;
+      }
 
       self.nfts.set(self.totalNftsHold, sender());
+      let r: Int = random(0, self.totalNftsHold);
       self.totalNftsHold = self.totalNftsHold + 1;
-      let r: Int = random(0, self.totalNftsHold - 1);
       let tmpr: Int = r;
       let addr: Address? = self.nfts.get(r);
       while (addr == null) {
@@ -123,7 +123,7 @@ contract Task5 with Deployable {
       }
       send(SendParameters{
           to: addr!!,
-          value: ctx.value - ton("2") - forwardFee,
+          value: ctx.value - ton("2.1") ,
           mode: SendPayGasSeparately + SendIgnoreErrors,
           bounce: false,
           body: Transfer {
@@ -131,7 +131,7 @@ contract Task5 with Deployable {
               newOwner: msg.prevOwner,
               responseDestination: msg.prevOwner,
               customPayload: null,
-              forwardAmount: ctx.value - ton("2") - forwardFee,
+              forwardAmount: ctx.value - ton("2.1"),
               forwardPayload: emptySlice()
           }.toCell()
       });
