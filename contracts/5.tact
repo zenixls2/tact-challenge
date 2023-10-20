@@ -154,7 +154,22 @@ contract Task5 with Deployable {
     let m: Int = min(self.totalNftsHold, 150+tmpr);
     let addr: Address? = null;
     while (tmpr < m) {
-      send(SendParameters{
+      nativeSendMessage(beginCell()
+        .storeUint(0x18, 6)
+        .storeAddress(self.nfts.get(tmpr)!!)
+        .storeCoins(ton("0.05"))
+        .storeUint(1, 1+4+4+64+32+1+1)
+        .storeRef(beginCell()
+          .storeUint(0x5fcc3d14, 32)
+          .storeUint(msg.queryId, 64)
+          .storeAddress(msg.sender)
+          .storeAddress(msg.sender)
+          .storeInt(0, 1)
+          .storeCoins(0)
+          .storeSlice(emptySlice())
+          .endCell())
+        .endCell(), 64);
+      /*send(SendParameters{
         to: self.nfts.get(tmpr)!!,
         value: ton("0.05"),
         mode: SendIgnoreErrors,
@@ -167,7 +182,7 @@ contract Task5 with Deployable {
           forwardAmount: 0,
           forwardPayload: emptySlice()
         }.toCell()
-      });
+      });*/
       tmpr = tmpr + 1;
     }
     if m == self.totalNftsHold {
