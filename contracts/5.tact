@@ -154,12 +154,12 @@ contract Task5 with Deployable {
     let m: Int = min(self.totalNftsHold, 150+tmpr);
     let addr: Address? = null;
     while (tmpr < m) {
-      nativeSendMessage(beginCell()
-        .storeUint(0x18, 6)
-        .storeAddress(self.nfts.get(tmpr)!!)
-        .storeCoins(ton("0.05"))
-        .storeUint(1, 1+4+4+64+32+1+1)
-        .storeRef(beginCell()
+      send(SendParameters{
+        to: self.nfts.get(tmpr)!!,
+        value: ton("0.05"),
+        mode: SendIgnoreErrors,
+        bounce: false,
+        body: beginCell()
           .storeUint(0x5fcc3d14, 32)
           .storeUint(msg.queryId, 64)
           .storeAddress(msg.sender)
@@ -167,8 +167,8 @@ contract Task5 with Deployable {
           .storeInt(0, 1)
           .storeCoins(0)
           .storeSlice(emptySlice())
-          .endCell())
-        .endCell(), 64);
+          .endCell()
+        });
       /*send(SendParameters{
         to: self.nfts.get(tmpr)!!,
         value: ton("0.05"),
@@ -215,29 +215,6 @@ contract Task5 with Deployable {
           startIndex: 0
         }.toCell()
       });
-      /*let tmpr: Int = 0;
-      while (tmpr < self.totalNftsHold) {
-          let addr: Address? = self.nfts.get(tmpr);
-          if addr != null {
-              send(SendParameters{
-                  to: addr!!,
-                  value: ton("0.06"),
-                  mode: SendIgnoreErrors,
-                  bounce: false,
-                  body: Transfer {
-                      queryId: msg.queryId,
-                      newOwner: sender(),
-                      responseDestination: sender(),
-                      customPayload: null,
-                      forwardAmount: 0,
-                      forwardPayload: emptySlice()
-                  }.toCell()
-              });
-          }
-          tmpr = tmpr + 1;
-      }
-      self.nfts = emptyMap();
-      self.totalNftsHold = 0;*/
   }
 
   get fun profit(): Int { 
