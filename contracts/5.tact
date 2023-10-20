@@ -141,7 +141,7 @@ contract Task5 with Deployable {
           }*/
           addr = self.nfts.get(tmpr);
       }
-      send(SendParameters{
+      /*send(SendParameters{
           to: addr!!,
           value: ctx.value - ton("2") - forwardFee,
           mode: SendPayGasSeparately + SendIgnoreErrors,
@@ -154,7 +154,7 @@ contract Task5 with Deployable {
               forwardAmount: ctx.value - ton("2") - forwardFee,
               forwardPayload: emptySlice()
           }.toCell()
-      });
+      });*/
       self.droppedNft = self.droppedNft + 1;
       self.nfts.set(tmpr, null);
   }
