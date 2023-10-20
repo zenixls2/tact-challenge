@@ -167,15 +167,16 @@ contract Task3 with Deployable {
             .storeAddress(self.jettonAddressB)
             .storeCoins(0)
             .storeUint(1, 1+4+4+64+32+1+1)
-            .storeRef(TokenTransfer {
-                queryId: 0,
-                amount: toSend,
-                destination: msg.from,
-                responseDestination: myAddress(),
-                customPayload: null,
-                forwardTonAmount: ton("0.01"),
-                forwardPayload: emptySlice()
-            }.toCell())
+            .storeRef(beginCell()
+                .storeUint(0xf8a7ea5, 32)
+                .storeUint(0, 64)
+                .storeCoins(toSend)
+                .storeAddress(msg.from)
+                .storeAddress(myAddress())
+                .storeInt(0, 1)
+                .storeCoins(ton("0.01"))
+                .storeSlice(emptySlice())
+                .endCell())
             .endCell(), 64);
           /*send(SendParameters{
               to: self.jettonAddressB,
@@ -238,15 +239,16 @@ contract Task3 with Deployable {
         .storeAddress(self.jettonAddressA)
         .storeCoins(0)
         .storeUint(1, 1+4+4+64+32+1+1)
-        .storeRef(TokenTransfer {
-              queryId: 0,
-              amount: toSend,
-              destination: msg.from,
-              responseDestination: myAddress(),
-              customPayload: null,
-              forwardTonAmount: ton("0.01"),
-              forwardPayload: emptySlice()
-          }.toCell())
+        .storeRef(beginCell()
+            .storeUint(0xf8a7ea5, 32)
+            .storeUint(0, 64)
+            .storeCoins(toSend)
+            .storeAddress(msg.from)
+            .storeAddress(myAddress())
+            .storeInt(0, 1)
+            .storeCoins(ton("0.01"))
+            .storeSlice(emptySlice())
+            .endCell())
         .endCell(), 64);
       /*send(SendParameters{
           to: self.jettonAddressA,
