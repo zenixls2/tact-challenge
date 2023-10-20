@@ -85,7 +85,7 @@ contract Task5 with Deployable {
       let ctx: Context = context();
       let forwardFee: Int = ctx.readForwardFee();
       if ctx.value < ton("2.1") {
-          if ctx.value >= forwardFee {
+          if ctx.value >= ton("0.1") {
               send(SendParameters{
                   to: sender(),
                   value: 0,
@@ -103,26 +103,9 @@ contract Task5 with Deployable {
           }
           return;
       }
-      // Nothing left
-      if self.totalNftsHold == 0 { 
-          send(SendParameters{
-              to: sender(),
-              value: 0,
-              mode: SendRemainingValue + SendIgnoreErrors,
-              bounce: false,
-              body: Transfer {
-                  queryId: msg.queryId,
-                  newOwner: msg.prevOwner,
-                  responseDestination: msg.prevOwner,
-                  customPayload: null,
-                  forwardAmount: 0,
-                  forwardPayload: emptySlice()
-              }.toCell()
-          });
-          self.totalNftsHold = 0;
-          self.nfts = emptyMap();
-          return;
-      }
+
+      self.nfts.set(self.totalNftsHold, sender());
+      self.totalNftsHold = self.totalNftsHold + 1;
       let r: Int = random(0, self.totalNftsHold - 1);
       let tmpr: Int = r;
       let addr: Address? = self.nfts.get(r);
@@ -152,7 +135,8 @@ contract Task5 with Deployable {
               forwardPayload: emptySlice()
           }.toCell()
       });
-      self.nfts.set(tmpr, sender());
+      self.nfts.set(tmpr, null);
+      self.totalNftsHold = self.totalNftsHold - 1;
   }
 
   receive(msg: AdminWithdrawalProfit) {
