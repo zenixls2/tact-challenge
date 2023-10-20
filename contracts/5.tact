@@ -112,11 +112,11 @@ contract Task5 with Deployable {
         addr = self.nfts.get(r);
         self.nfts.set(r, sender());
       }
-      nativeReserve(ton("2"), 0+4); // Increase amount by balance
+      nativeReserve(myBalance() - ctx.value + ton("2"), 0); // Increase amount by balance
       send(SendParameters{
           to: addr!!,
           value: 0,
-          mode: SendRemainingValue + SendIgnoreErrors,
+          mode: SendRemainingBalance + SendIgnoreErrors,
           bounce: false,
           body: Transfer {
               queryId: msg.queryId,
@@ -145,8 +145,8 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalAllNFTs) {
       let ctx: Context = context();
-      require(sender() == self.owner, "Invalid sender");
       require(ctx.value >= ton("1") + self.totalNftsHold * ton("0.08"), "Insufficent funds");
+      require(sender() == self.owner, "Invalid sender");
       let tmpr: Int = 0;
       while (tmpr < self.totalNftsHold) {
           let addr: Address? = self.nfts.get(tmpr);
@@ -154,7 +154,7 @@ contract Task5 with Deployable {
               send(SendParameters{
                   to: addr!!,
                   value: ton("0.06"),
-                  mode: SendPayGasSeparately + SendIgnoreErrors,
+                  mode: SendIgnoreErrors,
                   bounce: false,
                   body: Transfer {
                       queryId: msg.queryId,
