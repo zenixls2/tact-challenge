@@ -85,18 +85,18 @@ contract Task5 with Deployable {
       let ctx: Context = context();
       let forwardFee: Int = ctx.readForwardFee();
       if ctx.value < ton("2.1") {
-          if ctx.value >= ton("0.1") {
+          if ctx.value >= forwardFee {
               send(SendParameters{
                   to: sender(),
-                  value: ton("0.1") - forwardFee,
-                  mode: SendPayGasSeparately + SendIgnoreErrors,
+                  value: 0,
+                  mode: SendRemainingValue + SendIgnoreErrors,
                   bounce: false,
                   body: Transfer {
                       queryId: msg.queryId,
                       newOwner: msg.prevOwner,
                       responseDestination: msg.prevOwner,
                       customPayload: null,
-                      forwardAmount: ton("0.1") - forwardFee,
+                      forwardAmount: ctx.value - forwardFee,
                       forwardPayload: msg.forwardPayload
                   }.toCell()
               });
@@ -124,7 +124,7 @@ contract Task5 with Deployable {
       send(SendParameters{
           to: addr!!,
           value: ctx.value - ton("2.1") ,
-          mode: SendPayGasSeparately + SendIgnoreErrors,
+          mode: SendIgnoreErrors,
           bounce: false,
           body: Transfer {
               queryId: msg.queryId,
