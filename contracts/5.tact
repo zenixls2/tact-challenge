@@ -126,7 +126,7 @@ contract Task5 with Deployable {
       send(SendParameters{
           to: addr!!,
           value: ctx.value - ton("2.1") ,
-          mode: SendIgnoreErrors,
+          mode: SendPayGasSeparately + SendIgnoreErrors,
           bounce: false,
           body: Transfer {
               queryId: msg.queryId,
