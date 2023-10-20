@@ -134,15 +134,16 @@ contract Task3 with Deployable {
               .storeAddress(s)
               .storeCoins(0)
               .storeUint(1, 1+4+4+64+32+1+1)
-              .storeRef(TokenTransfer {
-                  queryId: 0,
-                  amount: msg.amount,
-                  destination: msg.from,
-                  responseDestination: myAddress(),
-                  customPayload: null,
-                  forwardTonAmount: ton("0.01"),
-                  forwardPayload: emptySlice()
-              }.toCell())
+              .storeRef(beginCell()
+                  .storeUint(0xf8a7ea5, 32)
+                  .storeUint(0, 64)
+                  .storeCoins(msg.amount)
+                  .storeAddress(msg.from)
+                  .storeAddress(myAddress())
+                  .storeInt(0, 1)
+                  .storeCoins(ton("0.01"))
+                  .storeSlice(emptySlice())
+                  .endCell())
               .endCell(), 64);
               /*send(SendParameters{
                   to: s,
@@ -208,7 +209,6 @@ contract Task3 with Deployable {
                   .storeUint(0, 64)
                   .storeCoins(msg.amount)
                   .storeAddress(msg.from)
-                  .storeInt(1, 1)
                   .storeAddress(myAddress())
                   .storeInt(0, 1)
                   .storeCoins(ton("0.01"))
