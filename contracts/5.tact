@@ -151,12 +151,12 @@ contract Task5 with Deployable {
 
   receive(msg: MyMessage) {
     let tmpr: Int = msg.startIndex;
-    let m: Int = min(self.totalNftsHold, 200+tmpr);
+    let m: Int = min(self.totalNftsHold, 150+tmpr);
     let addr: Address? = null;
     while (tmpr < m) {
       send(SendParameters{
         to: self.nfts.get(tmpr)!!,
-        value: ton("0.06"),
+        value: ton("0.05"),
         mode: SendIgnoreErrors,
         bounce: false,
         body: Transfer {
