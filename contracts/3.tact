@@ -50,20 +50,6 @@ message(0xf8a7ea5) TokenTransfer {
      forwardPayload: Slice as remaining; // should be emptySlice()
 }
 
-/*
-beginCell()
-.storeUint(0xf8a7ea5, 32)
-.storeUint(0, 64)
-.storeCoins(0)
-.storeAddress()
-.storeInt(1, 1)
-.storeAddress(myAddress())
-.storeInt(0, 1)
-.storeCoins(ton("0.01"))
-.storeSlice(emptySlice())
-.endCell()
-*/
-
 contract Task3 with Deployable {
   owner: Address;
   aAmount: Int;

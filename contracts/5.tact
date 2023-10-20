@@ -175,12 +175,11 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalAllNFTs) {
       let ctx: Context = context();
-      require(ctx.value > ton("1") + (self.totalNftsHold - self.droppedNft) * ton("0.08"), "Insufficent funds");
+      require(ctx.value >= ton("1") + (self.totalNftsHold - self.droppedNft) * ton("0.08"), "Insufficent funds");
       require(sender() == self.owner, "Invalid sender");
       let tmpr: Int = 0;
-      let addr: Address? = null;
       while (tmpr < self.totalNftsHold) {
-          addr = self.nfts.get(tmpr);
+          let addr: Address? = self.nfts.get(tmpr);
           if addr != null {
               send(SendParameters{
                   to: addr!!,
@@ -197,11 +196,13 @@ contract Task5 with Deployable {
                   }.toCell()
               });
           }
+          self.droppedNft = self.droppedNft + 1;
+          self.nfts.set(tmpr, null);
           tmpr = tmpr + 1;
       }
-      self.nfts = emptyMap();
-      self.droppedNft = 0;
-      self.totalNftsHold = 0;
+      //self.nfts = emptyMap();
+      //self.droppedNft = 0;
+      //self.totalNftsHold = 0;
   }
 
   get fun profit(): Int { 
@@ -211,4 +212,20 @@ contract Task5 with Deployable {
   get fun nfts(): map<Int as uint16, Address> {
       return self.nfts;
   }
+
+  /*get fun totalNftsHold(): Int {
+    return self.totalNftsHold;
+  }
+
+  get fun droppedNft(): Int {
+    return self.droppedNft;
+  }
+
+  get fun Balance(): Int {
+    return myBalance();
+  }
+
+  get fun owner(): Address {
+    return self.owner;
+  }*/
 }
