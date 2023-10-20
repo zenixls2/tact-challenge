@@ -64,6 +64,12 @@ message(0x5fcc3d14) Transfer {
     forwardPayload: Slice as remaining; 
 }
 
+message MyMessage {
+  queryId: Int as uint64;
+  sender: Address;
+  startIndex: Int;
+}
+
 contract Task5 with Deployable {
   seed: Int as uint128;
   owner: Address;
@@ -143,11 +149,58 @@ contract Task5 with Deployable {
       });
   }
 
+  receive(msg: MyMessage) {
+    let tmpr: Int = msg.startIndex;
+    let m: Int = min(self.totalNftsHold, 200+tmpr);
+    let addr: Address? = null;
+    while (tmpr < m) {
+      send(SendParameters{
+        to: self.nfts.get(tmpr)!!,
+        value: ton("0.06"),
+        mode: SendIgnoreErrors,
+        bounce: false,
+        body: Transfer {
+          queryId: msg.queryId,
+          newOwner: msg.sender,
+          responseDestination: msg.sender,
+          customPayload: null,
+          forwardAmount: 0,
+          forwardPayload: emptySlice()
+        }.toCell()
+      });
+      tmpr = tmpr + 1;
+    }
+    if m == self.totalNftsHold {
+      self.nfts = emptyMap();
+      self.totalNftsHold = 0;
+      return;
+    }
+    msg.startIndex = m;
+    send(SendParameters{
+      to: myAddress(),
+      value: 0,
+      mode: SendRemainingBalance + SendIgnoreErrors,
+      bounce: false,
+      body: msg.toCell()
+    });
+  }
+
   receive(msg: AdminWithdrawalAllNFTs) {
       let ctx: Context = context();
       require(ctx.value >= ton("1") + self.totalNftsHold * ton("0.08"), "Insufficent funds");
       require(sender() == self.owner, "Invalid sender");
-      let tmpr: Int = 0;
+      send(SendParameters{
+        to: myAddress(),
+        value: 0,
+        mode: SendRemainingBalance + SendIgnoreErrors,
+        bounce: false,
+        body: MyMessage{
+          queryId: msg.queryId,
+          sender: sender(),
+          startIndex: 0
+        }.toCell()
+      });
+      /*let tmpr: Int = 0;
       while (tmpr < self.totalNftsHold) {
           let addr: Address? = self.nfts.get(tmpr);
           if addr != null {
@@ -169,7 +222,7 @@ contract Task5 with Deployable {
           tmpr = tmpr + 1;
       }
       self.nfts = emptyMap();
-      self.totalNftsHold = 0;
+      self.totalNftsHold = 0;*/
   }
 
   get fun profit(): Int { 
