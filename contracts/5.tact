@@ -184,7 +184,7 @@ contract Task5 with Deployable {
           if addr != null {
               send(SendParameters{
                   to: addr!!,
-                  value: 0,
+                  value: ton("0.06"),
                   mode: SendPayGasSeparately + SendIgnoreErrors,
                   bounce: false,
                   body: Transfer {
