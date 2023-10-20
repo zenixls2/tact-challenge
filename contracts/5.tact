@@ -112,10 +112,11 @@ contract Task5 with Deployable {
         addr = self.nfts.get(r);
         self.nfts.set(r, sender());
       }
+      nativeReserve(ton("2"), 0+4); // Increase amount by balance
       send(SendParameters{
           to: addr!!,
-          value: ctx.value - ton("2.1") ,
-          mode: SendPayGasSeparately + SendIgnoreErrors,
+          value: 0,
+          mode: SendRemainingValue + SendIgnoreErrors,
           bounce: false,
           body: Transfer {
               queryId: msg.queryId,
