@@ -104,9 +104,9 @@ contract Task5 with Deployable {
           return;
       } 
 
-      let r: Int = random(0, self.totalNftsHold);
+      let r: Int = random(0, self.totalNftsHold-1);
       let addr: Address? = null;
-      if r == self.totalNftsHold {
+      if r == self.totalNftsHold-1 {
          addr = sender();
       } else {
         addr = self.nfts.get(r);
