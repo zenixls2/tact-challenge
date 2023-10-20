@@ -32,14 +32,14 @@ message(0x05138d91) OwnershipAssigned {
     forwardPayload: Slice as remaining; 
 }
 
-message(0x5fcc3d14) Transfer { 
+/*message(0x5fcc3d14) Transfer { 
     queryId: Int as uint64;            
     newOwner: Address; 
     responseDestination: Address; 
     customPayload: Cell?; 
     forwardAmount: Int as coins; 
     forwardPayload: Slice as remaining; 
-}
+}*/
 
 message NftWithdrawal {
   queryId: Int as uint64;
@@ -115,14 +115,15 @@ contract Task4 with Deployable {
           .storeAddress(msg.nftAddress)
           .storeCoins(0)
           .storeUint(1, 1+4+4+64+32+1+1)
-          .storeRef(Transfer {
-              queryId: msg.queryId,
-              newOwner: sender(),
-              responseDestination: sender(),
-              customPayload: null,
-              forwardAmount: 0,
-              forwardPayload: emptySlice()
-          }.toCell())
+          .storeRef(beginCell()
+              .storeUint(0x5fcc3d14, 32)
+              .storeUint(msg.queryId, 64)
+              .storeAddress(sender())
+              .storeAddress(sender())
+              .storeInt(0, 1)
+              .storeCoins(0)
+              .storeSlice(emptySlice())
+              .endCell())
           .endCell(), 64);
 
       /*send(SendParameters{
