@@ -97,7 +97,7 @@ contract Task5 with Deployable {
                       responseDestination: msg.prevOwner,
                       customPayload: null,
                       forwardAmount: ctx.value - forwardFee,
-                      forwardPayload: msg.forwardPayload
+                      forwardPayload: emptySlice()
                   }.toCell()
               });
           }
